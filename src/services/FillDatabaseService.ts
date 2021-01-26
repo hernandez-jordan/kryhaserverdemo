@@ -6,9 +6,8 @@ import {
 } from '../factories/UserDocumentFactory';
 
 export default class FillDatabaseService {
-  private _factory: IFactory<IUserDocumentFactory>;
 
-  constructor(_factory: IFactory<IUserDocumentFactory>) {
+  constructor(private _factory: IFactory<IUserDocumentFactory>) {
     this._factory = _factory;
   }
 
@@ -17,21 +16,20 @@ export default class FillDatabaseService {
     for (let i = 0; i < 100; i++) {
       const userDocuments = this._factory.build({}, { numUserDocuments: 1000 }).documents;
       await this.insertUserDocuments(userDocuments);
+      console.log(i)
     }
   };
 
   private insertUserDocuments = (userDocuments: IUserDocument[]) =>
-    new Promise<void>((resolve) => {
+    new Promise<void>((resolve, reject) => {
       UserDocument.collection.insertMany(userDocuments, (err, userDocs) => {
         if (err) {
-          console.log('err', err);
-          resolve();
+          reject(Error('Promise failed'));
         } else {
-          console.log(
+          resolve(console.log(
             'userDocs insertedIds',
             Object.keys(userDocs.insertedIds).length
-          );
-          resolve();
+          ));
         }
       });
     });
